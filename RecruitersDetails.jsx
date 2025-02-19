@@ -33,39 +33,37 @@ const RecruitersDetails = () => {
 
   // Function to validate and sanitize image URL
   const getSafeImageUrl = (url) => {
+    if (!url) {
+      return "https://github.com/shadcn.png"; // Default image
+    }
     try {
-      const parsedUrl = new URL(url);
-      return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:"
-        ? url
-        : "https://github.com/shadcn.png";
+      const safeUrl = new URL(url); // Validate URL format
+      return safeUrl.protocol === "http:" || safeUrl.protocol === "https:" ? safeUrl.href : "https://github.com/shadcn.png";
     } catch (error) {
-      return "https://github.com/shadcn.png";
+      return "https://github.com/shadcn.png"; // Invalid URL fallback
     }
   };
 
   return (
     <>
       {user?.role !== "recruiter" && <Navbar linkName={"Recruiter Details"} />}
-      <div className=" flex flex-col md:flex-row gap-2 p-6">
+      <div className="flex flex-col md:flex-row gap-2 p-6">
         {loading ? (
           <div className="text-xl font-semibold">Loading...</div>
         ) : recruiterDetails ? (
           <>
-            <div className=" bg-white p-8 w-full md:w-1/3 rounded-lg shadow-lg flex flex-col space-y-2 h-fit">
+            <div className="bg-white p-8 w-full md:w-1/3 rounded-lg shadow-lg flex flex-col space-y-2 h-fit">
               <div>
                 <img
-                  src={getSafeImageUrl(
-                    recruiterDetails?.profile?.profilePhoto ||
-                      "https://github.com/shadcn.png"
-                  )}
-                  alt={`${recruiterDetails.fullname}'s profile`}
+                  src={getSafeImageUrl(recruiterDetails?.profile?.profilePhoto)}
+                  alt={`${recruiterDetails?.fullname || "Recruiter"}'s profile`}
                   className="w-32 h-32 rounded-full mx-auto"
                 />
               </div>
               <h2 className="text-3xl text-center font-bold">
                 {recruiterDetails?.fullname}
               </h2>
-              <p className="text-gray-700 flex items-center gap-2 ">
+              <p className="text-gray-700 flex items-center gap-2">
                 <span>
                   <strong>Email:</strong> {recruiterDetails?.emailId?.email}
                 </span>
@@ -83,10 +81,9 @@ const RecruitersDetails = () => {
                   )}
                 </span>
               </p>
-              <p className="text-gray-700 flex items-center gap-2 ">
+              <p className="text-gray-700 flex items-center gap-2">
                 <span>
-                  <strong>Phone Number:</strong>{" "}
-                  {recruiterDetails?.phoneNumber?.number || "N/A"}
+                  <strong>Phone Number:</strong> {recruiterDetails?.phoneNumber?.number || "N/A"}
                 </span>
                 {recruiterDetails?.phoneNumber?.number && (
                   <span
@@ -105,28 +102,23 @@ const RecruitersDetails = () => {
                 )}
               </p>
 
-              <p className="text-gray-700 ">
-                <strong>Position:</strong>{" "}
-                {recruiterDetails?.position || "Not specified"}
+              <p className="text-gray-700">
+                <strong>Position:</strong> {recruiterDetails?.position || "Not specified"}
               </p>
               <p className="text-gray-700">
-                <strong>Company Created:</strong>{" "}
-                {recruiterDetails?.isCompanyCreated ? "Yes" : "No"}
+                <strong>Company Created:</strong> {recruiterDetails?.isCompanyCreated ? "Yes" : "No"}
               </p>
-              <p className="text-gray-700 ">
-                <strong>Account Status:</strong>{" "}
+              <p className="text-gray-700">
+                <strong>Account Status:</strong>
                 <span
                   className={`${
-                    recruiterDetails?.isActive
-                      ? "text-green-600"
-                      : "text-red-600"
+                    recruiterDetails?.isActive ? "text-green-600" : "text-red-600"
                   }`}
                 >
                   {recruiterDetails?.isActive ? "Active" : "Inactive"}
                 </span>
               </p>
-
-              <p className="text-gray-700 ">
+              <p className="text-gray-700">
                 <strong>Role:</strong> {recruiterDetails?.role}
               </p>
             </div>
