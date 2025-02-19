@@ -70,22 +70,25 @@ const CompanyDetails = () => {
 
   // Secure URL function with strict validation
   const getSafeUrl = useMemo(() => (url) => {
-    if (!url) return "#"; // Default safe value
+  if (!url || typeof url !== "string") return "#"; // Return a safe fallback if URL is null or not a string
 
-    try {
-      const decodedUrl = decodeURIComponent(url);
-      const sanitizedUrl = DOMPurify.sanitize(decodedUrl);
-      const safeUrl = new URL(sanitizedUrl, window.location.origin);
+  try {
+    // Decode, sanitize, and validate URL
+    const decodedUrl = decodeURIComponent(url.trim()); 
+    const sanitizedUrl = DOMPurify.sanitize(decodedUrl);
+    const safeUrl = new URL(sanitizedUrl, window.location.origin);
 
-      if (["http:", "https:"].includes(safeUrl.protocol)) {
-        return safeUrl.href;
-      }
-    } catch (error) {
-      console.warn("Invalid URL:", url);
+    // Allow only http and https protocols
+    if (safeUrl.protocol === "http:" || safeUrl.protocol === "https:") {
+      return safeUrl.href;
     }
+  } catch (error) {
+    console.warn("Invalid or Malformed URL:", url, error);
+  }
 
-    return "#"; // Fallback to prevent issues
-  }, []);
+  return "#"; // Return "#" as a safe fallback for invalid URLs
+}, []);
+
 
   return (
     <>
