@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { COMPANY_API_END_POINT } from "@/utils/ApiEndPoint";
-import { RECRUITER_API_END_POINT } from "@/utils/ApiEndPoint";
+import DOMPurify from "dompurify";
+import { COMPANY_API_END_POINT, RECRUITER_API_END_POINT } from "@/utils/ApiEndPoint";
 import { toast } from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/admin/Navbar";
@@ -26,15 +26,13 @@ const CompanyDetails = () => {
       const response = await axios.post(
         `${COMPANY_API_END_POINT}/company-by-id`,
         { companyId },
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
       if (response.data.success) {
         setCompany(response.data.company);
       }
     } catch (err) {
-      console.log(`error in company fetching ${err}`);
+      console.error(`Error fetching company: ${err}`);
     }
   };
 
@@ -52,6 +50,7 @@ const CompanyDetails = () => {
         },
         withCredentials: true,
       });
+
       if (response.data.success) {
         dispatch(fetchCompanyStats());
         dispatch(fetchRecruiterStats());
@@ -63,32 +62,35 @@ const CompanyDetails = () => {
       }
     } catch (err) {
       console.error("Error deleting company:", err);
-      toast.error(
-        "There was an error deleting the company. Please try again later."
-      );
+      toast.error("Error deleting company. Try again later.");
     } finally {
       dSetLoading(false);
     }
   };
 
-  // Function to validate and sanitize URL
-  const getSafeUrl = (url) => {
-    if (!url) return "#"; // Default to prevent invalid URLs
+  // Secure URL function with strict validation
+  const getSafeUrl = useMemo(() => (url) => {
+    if (!url) return "#"; // Default safe value
 
     try {
-      const safeUrl = new URL(url, window.location.origin);
+      const decodedUrl = decodeURIComponent(url);
+      const sanitizedUrl = DOMPurify.sanitize(decodedUrl);
+      const safeUrl = new URL(sanitizedUrl, window.location.origin);
+
       if (["http:", "https:"].includes(safeUrl.protocol)) {
         return safeUrl.href;
       }
     } catch (error) {
-      return "#"; // Return safe default if URL parsing fails
+      console.warn("Invalid URL:", url);
     }
-  };
+
+    return "#"; // Fallback to prevent issues
+  }, []);
 
   return (
     <>
       <Navbar linkName={"Company Details"} />
-      <div className="max-w-6xl mx-auto p-8  m-4  bg-white rounded-lg">
+      <div className="max-w-6xl mx-auto p-8 m-4 bg-white rounded-lg">
         <h1 className="text-3xl font-semibold text-gray-800 mb-8 text-center">
           Company Details
         </h1>
@@ -102,37 +104,6 @@ const CompanyDetails = () => {
               </p>
             </div>
             <div className="info-card">
-              <p className="text-sm text-gray-500 font-medium">
-                Company Address
-              </p>
-              <p className="text-xl text-gray-500 font-semibold">
-                Street Address:{" "}
-                <span className=" text-gray-800">
-                  {company?.address.streetAddress}
-                </span>
-              </p>
-              <p className="text-xl text-gray-500 font-semibold">
-                City:{" "}
-                <span className="text-gray-800">{company?.address.city}</span>
-              </p>
-              <p className="text-xl text-gray-500 font-semibold">
-                Postal Code:{" "}
-                <span className=" text-gray-800">
-                  {company?.address.postalCode}
-                </span>
-              </p>
-              <p className="text-xl text-gray-500 font-semibold">
-                State:{" "}
-                <span className="text-gray-800">{company?.address.state}</span>
-              </p>
-              <p className="text-xl text-gray-500 font-semibold">
-                Country:{" "}
-                <span className=" text-gray-800 ">
-                  {company?.address.country}
-                </span>
-              </p>
-            </div>
-            <div className="info-card">
               <p className="text-sm text-gray-500 font-medium">Website</p>
               <a
                 href={getSafeUrl(company?.companyWebsite)}
@@ -142,38 +113,6 @@ const CompanyDetails = () => {
               >
                 {company?.companyWebsite}
               </a>
-            </div>
-            <div className="info-card">
-              <p className="text-sm text-gray-500 font-medium">Industry</p>
-              <p className="text-xl text-gray-800 font-semibold">
-                {company?.industry}
-              </p>
-            </div>
-            <div className="info-card">
-              <p className="text-sm text-gray-500 font-medium">
-                Business Email
-              </p>
-              <p className="text-xl text-gray-800 font-semibold">
-                {company?.email}
-              </p>
-            </div>
-            <div className="info-card">
-              <p className="text-sm text-gray-500 font-medium">Admin Email</p>
-              <p className="text-xl text-gray-800 font-semibold">
-                {company?.adminEmail}
-              </p>
-            </div>
-            <div className="info-card">
-              <p className="text-sm text-gray-500 font-medium">Phone</p>
-              <p className="text-xl text-gray-800 font-semibold">
-                {company?.phone}
-              </p>
-            </div>
-            <div className="info-card">
-              <p className="text-sm text-gray-500 font-medium">CIN Number</p>
-              <p className="text-xl text-gray-800 font-semibold">
-                {company?.CIN}
-              </p>
             </div>
             <div className="info-card">
               <p className="text-sm text-gray-500 font-medium">Business File</p>
@@ -191,7 +130,7 @@ const CompanyDetails = () => {
           <div className="flex justify-end space-x-6 mt-8">
             <button
               onClick={() => navigate(`/admin/recruiters/${companyId}`)}
-              className={`px-6 py-3 text-white bg-blue-700 rounded-md hover:bg-blue-800 transition`}
+              className="px-6 py-3 text-white bg-blue-700 rounded-md hover:bg-blue-800 transition"
             >
               Recruiters List
             </button>
