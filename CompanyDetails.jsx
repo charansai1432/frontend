@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import DOMPurify from "dompurify"; // Import DOMPurify
 import { COMPANY_API_END_POINT } from "@/utils/ApiEndPoint";
 import { RECRUITER_API_END_POINT } from "@/utils/ApiEndPoint";
 import { toast } from "react-hot-toast";
@@ -13,6 +12,8 @@ import {
   fetchJobStats,
   fetchApplicationStats,
 } from "@/redux/admin/statsSlice";
+const companyWebsite = getSafeUrl(company?.companyWebsite);
+const businessFileUrl = getSafeUrl(company?.businessFile);
 
 const CompanyDetails = () => {
   const { user } = useSelector((state) => state.auth);
@@ -35,7 +36,7 @@ const CompanyDetails = () => {
         setCompany(response.data.company);
       }
     } catch (err) {
-      console.log(`Error fetching company: ${err}`);
+      console.log(`error in company fetching ${err}`);
     }
   };
 
@@ -72,7 +73,7 @@ const CompanyDetails = () => {
     }
   };
 
-  // Function to sanitize and validate URL
+  // Function to validate and sanitize URL
   const getSafeUrl = (url) => {
     if (!url) return "#"; // Default to prevent invalid URLs
 
@@ -86,15 +87,10 @@ const CompanyDetails = () => {
     }
   };
 
-  // Function to sanitize text to prevent XSS
-  const sanitizeText = (text) => {
-    return DOMPurify.sanitize(text);
-  };
-
   return (
     <>
-      <Navbar linkName="Company Details" />
-      <div className="max-w-6xl mx-auto p-8 m-4 bg-white rounded-lg">
+      <Navbar linkName={"Company Details"} />
+      <div className="max-w-6xl mx-auto p-8  m-4  bg-white rounded-lg">
         <h1 className="text-3xl font-semibold text-gray-800 mb-8 text-center">
           Company Details
         </h1>
@@ -104,7 +100,7 @@ const CompanyDetails = () => {
             <div className="info-card">
               <p className="text-sm text-gray-500 font-medium">Company Name</p>
               <p className="text-xl text-gray-800 font-semibold">
-                {sanitizeText(company?.companyName)}
+                {company?.companyName}
               </p>
             </div>
             <div className="info-card">
@@ -113,52 +109,91 @@ const CompanyDetails = () => {
               </p>
               <p className="text-xl text-gray-500 font-semibold">
                 Street Address:{" "}
-                <span className="text-gray-800">
-                  {sanitizeText(company?.address.streetAddress)}
+                <span className=" text-gray-800">
+                  {company?.address.streetAddress}
                 </span>
               </p>
               <p className="text-xl text-gray-500 font-semibold">
                 City:{" "}
-                <span className="text-gray-800">
-                  {sanitizeText(company?.address.city)}
-                </span>
+                <span className="text-gray-800">{company?.address.city}</span>
               </p>
               <p className="text-xl text-gray-500 font-semibold">
                 Postal Code:{" "}
-                <span className="text-gray-800">
-                  {sanitizeText(company?.address.postalCode)}
+                <span className=" text-gray-800">
+                  {company?.address.postalCode}
                 </span>
               </p>
               <p className="text-xl text-gray-500 font-semibold">
                 State:{" "}
-                <span className="text-gray-800">
-                  {sanitizeText(company?.address.state)}
-                </span>
+                <span className="text-gray-800">{company?.address.state}</span>
               </p>
               <p className="text-xl text-gray-500 font-semibold">
                 Country:{" "}
-                <span className="text-gray-800">
-                  {sanitizeText(company?.address.country)}
+                <span className=" text-gray-800 ">
+                  {company?.address.country}
                 </span>
               </p>
             </div>
             <div className="info-card">
               <p className="text-sm text-gray-500 font-medium">Website</p>
               <a
-                href={getSafeUrl(company?.companyWebsite)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline text-xl font-semibold"
-              >
-                {sanitizeText(company?.companyWebsite)}
-              </a>
+  href={companyWebsite}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-blue-500 hover:underline text-xl font-semibold"
+>
+  {company?.companyWebsite}
+</a>
+            </div>
+            <div className="info-card">
+              <p className="text-sm text-gray-500 font-medium">Industry</p>
+              <p className="text-xl text-gray-800 font-semibold">
+                {company?.industry}
+              </p>
+            </div>
+            <div className="info-card">
+              <p className="text-sm text-gray-500 font-medium">
+                Business Email
+              </p>
+              <p className="text-xl text-gray-800 font-semibold">
+                {company?.email}
+              </p>
+            </div>
+            <div className="info-card">
+              <p className="text-sm text-gray-500 font-medium">Admin Email</p>
+              <p className="text-xl text-gray-800 font-semibold">
+                {company?.adminEmail}
+              </p>
+            </div>
+            <div className="info-card">
+              <p className="text-sm text-gray-500 font-medium">Phone</p>
+              <p className="text-xl text-gray-800 font-semibold">
+                {company?.phone}
+              </p>
+            </div>
+            <div className="info-card">
+              <p className="text-sm text-gray-500 font-medium">CIN Number</p>
+              <p className="text-xl text-gray-800 font-semibold">
+                {company?.CIN}
+              </p>
+            </div>
+            <div className="info-card">
+              <p className="text-sm text-gray-500 font-medium">Business File</p>
+              <a
+  href={businessFileUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-blue-500 hover:underline text-xl font-semibold"
+>
+  View Business File
+</a>
             </div>
           </div>
 
           <div className="flex justify-end space-x-6 mt-8">
             <button
               onClick={() => navigate(`/admin/recruiters/${companyId}`)}
-              className="px-6 py-3 text-white bg-blue-700 rounded-md hover:bg-blue-800 transition"
+              className={`px-6 py-3 text-white bg-blue-700 rounded-md hover:bg-blue-800 transition`}
             >
               Recruiters List
             </button>
