@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import DOMPurify from "dompurify"; // Import DOMPurify
-import { COMPANY_API_END_POINT, RECRUITER_API_END_POINT } from "@/utils/ApiEndPoint";
+import { COMPANY_API_END_POINT } from "@/utils/ApiEndPoint";
+import { RECRUITER_API_END_POINT } from "@/utils/ApiEndPoint";
 import { toast } from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/admin/Navbar";
@@ -26,13 +27,15 @@ const CompanyDetails = () => {
       const response = await axios.post(
         `${COMPANY_API_END_POINT}/company-by-id`,
         { companyId },
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
       if (response.data.success) {
         setCompany(response.data.company);
       }
     } catch (err) {
-      console.error(`Error fetching company details: ${err}`);
+      console.log(`Error fetching company: ${err}`);
     }
   };
 
@@ -44,10 +47,12 @@ const CompanyDetails = () => {
     try {
       dSetLoading(true);
       const response = await axios.delete(`${RECRUITER_API_END_POINT}/delete`, {
-        data: { userEmail: user?.emailId?.email, companyId },
+        data: {
+          userEmail: user?.emailId?.email,
+          companyId,
+        },
         withCredentials: true,
       });
-
       if (response.data.success) {
         dispatch(fetchCompanyStats());
         dispatch(fetchRecruiterStats());
@@ -59,15 +64,17 @@ const CompanyDetails = () => {
       }
     } catch (err) {
       console.error("Error deleting company:", err);
-      toast.error("There was an error deleting the company. Please try again later.");
+      toast.error(
+        "There was an error deleting the company. Please try again later."
+      );
     } finally {
       dSetLoading(false);
     }
   };
 
-  // Function to validate and sanitize URL
+  // Function to sanitize and validate URL
   const getSafeUrl = (url) => {
-    if (!url) return "#"; // Default safe URL
+    if (!url) return "#"; // Default to prevent invalid URLs
 
     try {
       const safeUrl = new URL(url, window.location.origin);
@@ -79,9 +86,9 @@ const CompanyDetails = () => {
     }
   };
 
-  // Function to sanitize HTML content
-  const sanitizeContent = (content) => {
-    return DOMPurify.sanitize(content);
+  // Function to sanitize text to prevent XSS
+  const sanitizeText = (text) => {
+    return DOMPurify.sanitize(text);
   };
 
   return (
@@ -97,27 +104,42 @@ const CompanyDetails = () => {
             <div className="info-card">
               <p className="text-sm text-gray-500 font-medium">Company Name</p>
               <p className="text-xl text-gray-800 font-semibold">
-                {sanitizeContent(company?.companyName)}
+                {sanitizeText(company?.companyName)}
               </p>
             </div>
             <div className="info-card">
-              <p className="text-sm text-gray-500 font-medium">Company Address</p>
-              <p className="text-xl text-gray-500 font-semibold">
-                Street Address:{" "}
-                <span className="text-gray-800">{sanitizeContent(company?.address?.streetAddress)}</span>
+              <p className="text-sm text-gray-500 font-medium">
+                Company Address
               </p>
               <p className="text-xl text-gray-500 font-semibold">
-                City: <span className="text-gray-800">{sanitizeContent(company?.address?.city)}</span>
+                Street Address:{" "}
+                <span className="text-gray-800">
+                  {sanitizeText(company?.address.streetAddress)}
+                </span>
+              </p>
+              <p className="text-xl text-gray-500 font-semibold">
+                City:{" "}
+                <span className="text-gray-800">
+                  {sanitizeText(company?.address.city)}
+                </span>
               </p>
               <p className="text-xl text-gray-500 font-semibold">
                 Postal Code:{" "}
-                <span className="text-gray-800">{sanitizeContent(company?.address?.postalCode)}</span>
+                <span className="text-gray-800">
+                  {sanitizeText(company?.address.postalCode)}
+                </span>
               </p>
               <p className="text-xl text-gray-500 font-semibold">
-                State: <span className="text-gray-800">{sanitizeContent(company?.address?.state)}</span>
+                State:{" "}
+                <span className="text-gray-800">
+                  {sanitizeText(company?.address.state)}
+                </span>
               </p>
               <p className="text-xl text-gray-500 font-semibold">
-                Country: <span className="text-gray-800">{sanitizeContent(company?.address?.country)}</span>
+                Country:{" "}
+                <span className="text-gray-800">
+                  {sanitizeText(company?.address.country)}
+                </span>
               </p>
             </div>
             <div className="info-card">
@@ -128,30 +150,7 @@ const CompanyDetails = () => {
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline text-xl font-semibold"
               >
-                {sanitizeContent(company?.companyWebsite)}
-              </a>
-            </div>
-            <div className="info-card">
-              <p className="text-sm text-gray-500 font-medium">Industry</p>
-              <p className="text-xl text-gray-800 font-semibold">
-                {sanitizeContent(company?.industry)}
-              </p>
-            </div>
-            <div className="info-card">
-              <p className="text-sm text-gray-500 font-medium">Business Email</p>
-              <p className="text-xl text-gray-800 font-semibold">
-                {sanitizeContent(company?.email)}
-              </p>
-            </div>
-            <div className="info-card">
-              <p className="text-sm text-gray-500 font-medium">Business File</p>
-              <a
-                href={getSafeUrl(company?.businessFile)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline text-xl font-semibold"
-              >
-                View Business File
+                {sanitizeText(company?.companyWebsite)}
               </a>
             </div>
           </div>
