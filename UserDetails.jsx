@@ -138,7 +138,7 @@ const UserDetails = () => {
                   <div className="mt-2">
                     <h4 className="text-lg font-semibold">Resume</h4>
                     <a
-                      href={getSafeUrl(user.profile.resume)}
+                      href={encodeURI(user.profile.resume)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-500 underline"
