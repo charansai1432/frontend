@@ -33,16 +33,19 @@ const RecruitersDetails = () => {
 
   // Function to validate and sanitize image URL
   const getSafeImageUrl = (url) => {
-    if (!url) {
-      return "https://github.com/shadcn.png"; // Default image
+  if (!url) return "https://github.com/shadcn.png"; // Default image
+
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:") {
+      return encodeURI(url);
     }
-    try {
-      const safeUrl = new URL(url); // Validate URL format
-      return safeUrl.protocol === "http:" || safeUrl.protocol === "https:" ? safeUrl.href : "https://github.com/shadcn.png";
-    } catch (error) {
-      return "https://github.com/shadcn.png"; // Invalid URL fallback
-    }
-  };
+  } catch (error) {
+    return "https://github.com/shadcn.png";
+  }
+
+  return "https://github.com/shadcn.png";
+};
 
   return (
     <>
@@ -55,10 +58,10 @@ const RecruitersDetails = () => {
             <div className="bg-white p-8 w-full md:w-1/3 rounded-lg shadow-lg flex flex-col space-y-2 h-fit">
               <div>
                 <img
-                  src={getSafeImageUrl(recruiterDetails?.profile?.profilePhoto)}
-                  alt={`${recruiterDetails?.fullname || "Recruiter"}'s profile`}
-                  className="w-32 h-32 rounded-full mx-auto"
-                />
+  src={getSafeImageUrl(recruiterDetails?.profile?.profilePhoto)}
+  alt={`${recruiterDetails?.fullname || "Recruiter"}'s profile`}
+  className="w-32 h-32 rounded-full mx-auto"
+/>
               </div>
               <h2 className="text-3xl text-center font-bold">
                 {recruiterDetails?.fullname}
