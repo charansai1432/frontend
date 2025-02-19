@@ -54,7 +54,7 @@ const RecruitersDetails = () => {
             <div className=" bg-white p-8 w-full md:w-1/3 rounded-lg shadow-lg flex flex-col space-y-2 h-fit">
               <div>
                 <img
-                  src={getSafeImageUrl(
+                  src={encodeURI(
                     recruiterDetails?.profile?.profilePhoto ||
                       "https://github.com/shadcn.png"
                   )}
