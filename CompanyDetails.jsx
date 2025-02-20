@@ -72,24 +72,23 @@ const CompanyDetails = () => {
   };
 
   // Function to validate and sanitize URL
-  function getSafeUrl(url) {
-    if (!url) return '#';
-    
-    // Validate URL protocol
-    const sanitizedUrl = url.trim().toLowerCase();
-    if (sanitizedUrl.startsWith('javascript:') || 
-        sanitizedUrl.startsWith('data:') || 
-        sanitizedUrl.startsWith('vbscript:')) {
-      return '#';
+  const getSafeUrl = (url) => {
+  if (!url) return "#"; // Return a safe default if the URL is missing
+
+  try {
+    const safeUrl = new URL(url);
+
+    // Allow only HTTP and HTTPS URLs
+    if (safeUrl.protocol === "http:" || safeUrl.protocol === "https:") {
+      return safeUrl.href;
+    } else {
+      return "#"; // Block other protocols like javascript:, data:, etc.
     }
-    
-    try {
-      new URL(url); // Validate URL format
-      return url;
-    } catch {
-      return '#';
-    }
+  } catch (error) {
+    return "#"; // If URL parsing fails, return a safe default
   }
+};
+
   
   return (
     <>
@@ -139,16 +138,18 @@ const CompanyDetails = () => {
               </p>
             </div>
             <div className="info-card">
-              <p className="text-sm text-gray-500 font-medium">Website</p>
-              <a
-                href={getSafeUrl(company?.companyWebsite)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline text-xl font-semibold"
-              >
-                {company?.companyWebsite}
-              </a>
-            </div>
+  <p className="text-sm text-gray-500 font-medium">Website</p>
+  {company?.companyWebsite && (
+    <a
+      href={getSafeUrl(company.companyWebsite)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-500 hover:underline text-xl font-semibold"
+    >
+      {company.companyWebsite}
+    </a>
+  )}
+</div>
             <div className="info-card">
               <p className="text-sm text-gray-500 font-medium">Industry</p>
               <p className="text-xl text-gray-800 font-semibold">
@@ -182,16 +183,18 @@ const CompanyDetails = () => {
               </p>
             </div>
             <div className="info-card">
-              <p className="text-sm text-gray-500 font-medium">Business File</p>
-              <a
-                href={getSafeUrl(company?.businessFile)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline text-xl font-semibold"
-              >
-                View Business File
-              </a>
-            </div>
+  <p className="text-sm text-gray-500 font-medium">Business File</p>
+  {company?.businessFile && (
+    <a
+      href={getSafeUrl(company.businessFile)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-500 hover:underline text-xl font-semibold"
+    >
+      View Business File
+    </a>
+  )}
+</div>
           </div>
 
           <div className="flex justify-end space-x-6 mt-8">
