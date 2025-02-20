@@ -64,16 +64,20 @@ const CompanyDetails = () => {
   };
 
   const sanitizeUrl = (url) => {
-    if (!url) return "#";
-    try {
-      const safeUrl = new URL(url);
-      if (["http:", "https:"].includes(safeUrl.protocol)) {
-        return safeUrl.href;
-      }
-    } catch (error) {
-      return "#";
+  if (!url || typeof url !== "string") return "#"; // Prevent non-string values
+
+  try {
+    const safeUrl = new URL(url, window.location.origin);
+    if (safeUrl.protocol === "http:" || safeUrl.protocol === "https:") {
+      return safeUrl.href;
     }
-  };
+  } catch (error) {
+    console.warn("Invalid URL:", url);
+  }
+
+  return "#"; // Default safe fallback
+};
+
 
   return (
     <>
@@ -124,13 +128,23 @@ const CompanyDetails = () => {
             <div className="info-card">
               <p className="text-sm text-gray-500 font-medium">Business File</p>
               <a
-                href={sanitizeUrl(company?.businessFile)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline text-xl font-semibold"
-              >
-                View Business File
-              </a>
+  href={sanitizeUrl(company?.businessFile)}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-blue-500 hover:underline text-xl font-semibold"
+>
+  View Business File
+</a>
+
+<a
+  href={sanitizeUrl(company?.companyWebsite)}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-blue-500 hover:underline text-xl font-semibold"
+>
+  {company?.companyWebsite ? "Visit Website" : "No Website Available"}
+</a>
+
             </div>
           </div>
           <div className="flex justify-end space-x-6 mt-8">
