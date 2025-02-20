@@ -73,21 +73,18 @@ const CompanyDetails = () => {
 
   // Function to validate and sanitize URL
   const getSafeUrl = (url) => {
-  if (!url) return "#"; // Return a safe default if the URL is missing
+  if (!url) return "#"; // Default to prevent invalid URLs
 
   try {
-    const safeUrl = new URL(url);
-
-    // Allow only HTTP and HTTPS URLs
-    if (safeUrl.protocol === "http:" || safeUrl.protocol === "https:") {
-      return safeUrl.href;
-    } else {
-      return "#"; // Block other protocols like javascript:, data:, etc.
+    const safeUrl = new URL(url, window.location.origin);
+    if (["http:", "https:"].includes(safeUrl.protocol)) {
+      return encodeURI(safeUrl.href); // Encoding to prevent XSS
     }
   } catch (error) {
-    return "#"; // If URL parsing fails, return a safe default
+    return "#"; // Return safe default if URL parsing fails
   }
 };
+
 
   
   return (
@@ -139,15 +136,17 @@ const CompanyDetails = () => {
             </div>
             <div className="info-card">
   <p className="text-sm text-gray-500 font-medium">Website</p>
-  {company?.companyWebsite && (
-    <a
-      href={getSafeUrl(company.companyWebsite)}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-500 hover:underline text-xl font-semibold"
-    >
-      {company.companyWebsite}
-    </a>
+  {company?.companyWebsite ? (
+  <a
+    href={getSafeUrl(company.companyWebsite)}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-blue-500 hover:underline text-xl font-semibold"
+  >
+    {company.companyWebsite}
+  </a>
+) : null}
+
   )}
 </div>
             <div className="info-card">
@@ -184,15 +183,17 @@ const CompanyDetails = () => {
             </div>
             <div className="info-card">
   <p className="text-sm text-gray-500 font-medium">Business File</p>
-  {company?.businessFile && (
-    <a
-      href={getSafeUrl(company.businessFile)}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-500 hover:underline text-xl font-semibold"
-    >
-      View Business File
-    </a>
+  {company?.businessFile ? (
+  <a
+    href={getSafeUrl(company.businessFile)}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-blue-500 hover:underline text-xl font-semibold"
+  >
+    View Business File
+  </a>
+) : null}
+
   )}
 </div>
           </div>
