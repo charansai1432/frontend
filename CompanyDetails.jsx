@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import DOMPurify from "dompurify";
 import { COMPANY_API_END_POINT, RECRUITER_API_END_POINT } from "@/utils/ApiEndPoint";
 import { toast } from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
@@ -32,7 +31,7 @@ const CompanyDetails = () => {
         setCompany(response.data.company);
       }
     } catch (err) {
-      console.error(`Error fetching company: ${err}`);
+      console.log(`Error fetching company details: ${err}`);
     }
   };
 
@@ -44,13 +43,9 @@ const CompanyDetails = () => {
     try {
       dSetLoading(true);
       const response = await axios.delete(`${RECRUITER_API_END_POINT}/delete`, {
-        data: {
-          userEmail: user?.emailId?.email,
-          companyId,
-        },
+        data: { userEmail: user?.emailId?.email, companyId },
         withCredentials: true,
       });
-
       if (response.data.success) {
         dispatch(fetchCompanyStats());
         dispatch(fetchRecruiterStats());
@@ -62,54 +57,63 @@ const CompanyDetails = () => {
       }
     } catch (err) {
       console.error("Error deleting company:", err);
-      toast.error("Error deleting company. Try again later.");
+      toast.error("There was an error deleting the company. Please try again later.");
     } finally {
       dSetLoading(false);
     }
   };
 
-  // Secure URL function with strict validation
-  const getSafeUrl = useMemo(() => (url) => {
-  if (!url || typeof url !== "string") return "#"; // Return a safe fallback if URL is null or not a string
-
-  try {
-    // Decode, sanitize, and validate URL
-    const decodedUrl = decodeURIComponent(url.trim()); 
-    const sanitizedUrl = DOMPurify.sanitize(decodedUrl);
-    const safeUrl = new URL(sanitizedUrl, window.location.origin);
-
-    // Allow only http and https protocols
-    if (safeUrl.protocol === "http:" || safeUrl.protocol === "https:") {
-      return safeUrl.href;
+  const sanitizeUrl = (url) => {
+    if (!url) return "#";
+    try {
+      const safeUrl = new URL(url);
+      if (["http:", "https:"].includes(safeUrl.protocol)) {
+        return safeUrl.href;
+      }
+    } catch (error) {
+      return "#";
     }
-  } catch (error) {
-    console.warn("Invalid or Malformed URL:", url, error);
-  }
-
-  return "#"; // Return "#" as a safe fallback for invalid URLs
-}, []);
-
+  };
 
   return (
     <>
       <Navbar linkName={"Company Details"} />
       <div className="max-w-6xl mx-auto p-8 m-4 bg-white rounded-lg">
-        <h1 className="text-3xl font-semibold text-gray-800 mb-8 text-center">
-          Company Details
-        </h1>
-
+        <h1 className="text-3xl font-semibold text-gray-800 mb-8 text-center">Company Details</h1>
         <div className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="info-card">
               <p className="text-sm text-gray-500 font-medium">Company Name</p>
-              <p className="text-xl text-gray-800 font-semibold">
-                {company?.companyName}
-              </p>
+              <p className="text-xl text-gray-800 font-semibold">{company?.companyName}</p>
+            </div>
+            <div className="info-card">
+              <p className="text-sm text-gray-500 font-medium">Company Address</p>
+              <p className="text-xl text-gray-800 font-semibold">{company?.address?.streetAddress}, {company?.address?.city}, {company?.address?.state}, {company?.address?.country} - {company?.address?.postalCode}</p>
+            </div>
+            <div className="info-card">
+              <p className="text-sm text-gray-500 font-medium">Industry</p>
+              <p className="text-xl text-gray-800 font-semibold">{company?.industry}</p>
+            </div>
+            <div className="info-card">
+              <p className="text-sm text-gray-500 font-medium">Business Email</p>
+              <p className="text-xl text-gray-800 font-semibold">{company?.email}</p>
+            </div>
+            <div className="info-card">
+              <p className="text-sm text-gray-500 font-medium">Admin Email</p>
+              <p className="text-xl text-gray-800 font-semibold">{company?.adminEmail}</p>
+            </div>
+            <div className="info-card">
+              <p className="text-sm text-gray-500 font-medium">Phone</p>
+              <p className="text-xl text-gray-800 font-semibold">{company?.phone}</p>
+            </div>
+            <div className="info-card">
+              <p className="text-sm text-gray-500 font-medium">CIN Number</p>
+              <p className="text-xl text-gray-800 font-semibold">{company?.CIN}</p>
             </div>
             <div className="info-card">
               <p className="text-sm text-gray-500 font-medium">Website</p>
               <a
-                href={getSafeUrl(company?.companyWebsite)}
+                href={sanitizeUrl(company?.companyWebsite)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline text-xl font-semibold"
@@ -120,7 +124,7 @@ const CompanyDetails = () => {
             <div className="info-card">
               <p className="text-sm text-gray-500 font-medium">Business File</p>
               <a
-                href={getSafeUrl(company?.businessFile)}
+                href={sanitizeUrl(company?.businessFile)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline text-xl font-semibold"
@@ -129,7 +133,6 @@ const CompanyDetails = () => {
               </a>
             </div>
           </div>
-
           <div className="flex justify-end space-x-6 mt-8">
             <button
               onClick={() => navigate(`/admin/recruiters/${companyId}`)}
@@ -139,9 +142,7 @@ const CompanyDetails = () => {
             </button>
             <button
               onClick={handleDeleteCompany}
-              className={`px-6 py-3 text-white bg-red-600 rounded-md hover:bg-red-700 transition duration-200 ${
-                dloading && "cursor-not-allowed"
-              }`}
+              className={`px-6 py-3 text-white bg-red-600 rounded-md hover:bg-red-700 transition duration-200 ${dloading && "cursor-not-allowed"}`}
               disabled={dloading}
             >
               {dloading ? "Deleting..." : "Delete Company"}
